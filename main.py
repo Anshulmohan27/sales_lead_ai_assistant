@@ -1,11 +1,13 @@
 import os
+import time
 from dotenv import load_dotenv
 from google import genai
+from google.genai import errors
+import chromadb
+
 load_dotenv()
 client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
-import chromadb
-from google.genai import errors
-import time
+
 
 class Deal:
     def __init__(self, client_name: str, company: str, deal_value: int, stage: str, notes: str):
@@ -15,24 +17,28 @@ class Deal:
         self.stage = stage
         self.notes = notes
 
+
 class CRM:
     def __init__(self):
         self.deals = []
+
     def add_deal(self, deal: Deal):
         self.deals.append(deal)
+
     def get_lead_info(self, client_name: str) -> dict:
         for deal in self.deals:
             if deal.client_name == client_name:
                 return {"company": deal.company, "deal_value": deal.deal_value,
                         "stage": deal.stage, "notes": deal.notes}
         return {"error": f"No lead found for {client_name}"}
-  	
+
     def get_lead_info_by_company(self, company: str) -> dict:
         for deal in self.deals:
             if deal.company == company:
                 return {"client_name": deal.client_name, "deal_value": deal.deal_value,
                         "stage": deal.stage, "notes": deal.notes}
         return {"error": f"No lead found for {company}"}
+
 
 amex = Deal('John', 'Amex', 5000, 'negotiation', 'want to go lower')
 apple = Deal('Stuart', 'Apple', 40000, 'prospecting', 'not sure if Stuart is the right person')
@@ -57,34 +63,37 @@ product_kb.add(
     ids=["doc1", "doc2", "doc3", "doc4"]
 )
 
-# standalone wrapper functions — these are what get passed as tools
+
 def get_lead_info(client_name: str) -> dict:
     """Look up CRM info (company, deal value, stage, notes) for a given client name.
     client_name is a first name, e.g. 'Jensen', 'Elon', 'John', 'Stuart'."""
     return crm.get_lead_info(client_name)
 
+
 def get_lead_info_by_company(company: str) -> dict:
     """Look up CRM info (client name, deal value, stage, notes) for a given company.
-    company is the name of company, e.g. 'NVIDIA', 'Tesla', 'Amex', 'Apple'."""
+    company is the name of a company, e.g. 'NVIDIA', 'Tesla', 'Amex', 'Apple'."""
     return crm.get_lead_info_by_company(company)
+
 
 def search_product_docs(question: str) -> str:
     """Search product knowledge base (pricing, features, policies) for relevant info."""
     results = product_kb.query(query_texts=[question], n_results=2)
     return "\n".join(results["documents"][0])
 
-# test it
-print("Sales Assistant ready. Type 'quit' to exit.\n")
-while True:
-    user_input = input("You: ")
-    if user_input.lower() == "quit":
-        break
-    try:
-        response = client.models.generate_content(
-            model="gemini-2.5-flash",
-            contents=user_input,
-            config={'tools': [get_lead_info, search_product_docs]}
-        )
-        print(f"Assistant: {response.text}\n")
-    except errors.ClientError as e:
-        print("Assistant: I'm getting rate-limited right now — please wait a moment and try again.\n")
+
+if __name__ == "__main__":
+    print("Sales Assistant ready. Type 'quit' to exit.\n")
+    while True:
+        user_input = input("You: ")
+        if user_input.lower() == "quit":
+            break
+        try:
+            response = client.models.generate_content(
+                model="gemini-2.5-flash",
+                contents=user_input,
+                config={'tools': [get_lead_info, get_lead_info_by_company, search_product_docs]}
+            )
+            print(f"Assistant: {response.text}\n")
+        except errors.ClientError:
+            print("Assistant: I'm getting rate-limited right now — please wait a moment and try again.\n")
