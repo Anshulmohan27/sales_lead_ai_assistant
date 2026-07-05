@@ -2,6 +2,10 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from main import client, get_lead_info, get_lead_info_by_company, search_product_docs
 from google.genai import errors
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+
+
 
 app = FastAPI(
     title="Sales Lead AI Assistant",
@@ -9,10 +13,12 @@ app = FastAPI(
     version="1.0.0"
 )
 
+
+
 class ChatRequest(BaseModel):
     message: str
 
-@app.post("/chat", response_model=ChatResponse, summary="Ask the sales assistant a question"))
+@app.post("/chat", summary="Ask the sales assistant a question")
 def chat(request: ChatRequest):
     try:
         response = client.models.generate_content(
@@ -23,3 +29,9 @@ def chat(request: ChatRequest):
         return {"reply": response.text}
     except errors.ClientError:
         raise HTTPException(status_code=429, detail="Rate limited — please try again shortly.")
+
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
+@app.get("/")
+def serve_ui():
+    return FileResponse("static/index.html")

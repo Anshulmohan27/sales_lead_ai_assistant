@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sales Lead Assistant</title>
+    <style>
+        body { font-family: sans-serif; max-width: 600px; margin: 40px auto; }
+        #chat { border: 1px solid #ccc; padding: 10px; height: 400px; overflow-y: auto; }
+        .user { color: blue; margin: 8px 0; }
+        .bot { color: green; margin: 8px 0; }
+        input { width: 80%; padding: 8px; }
+        button { padding: 8px; }
+    </style>
+</head>
+<body>
+    <h2>Sales Lead Assistant</h2>
+    <div id="chat"></div>
+    <input id="messageInput" placeholder="Ask a question..." />
+    <button onclick="sendMessage()">Send</button>
+
+    <script>
+        async function sendMessage() {
+            const input = document.getElementById("messageInput");
+            const message = input.value;
+            if (!message) return;
+
+            const chat = document.getElementById("chat");
+            chat.innerHTML += `<div class="user">You: ${message}</div>`;
+            input.value = "";
+
+            const response = await fetch("/chat", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ message: message })
+            });
+            const data = await response.json();
+            chat.innerHTML += `<div class="bot">Assistant: ${data.reply}</div>`;
+            chat.scrollTop = chat.scrollHeight;
+        }
+    </script>
+</body>
+</html>
