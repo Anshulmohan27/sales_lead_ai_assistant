@@ -2,7 +2,7 @@
 
 An AI assistant that helps sales reps get answers instantly — whether they're asking about a specific lead's status or a question about product pricing and features. Built to explore how LLM agents can combine **structured data lookup** (CRM records) with **unstructured knowledge retrieval** (RAG over product docs) in a single conversational interface.
 
-**Live demo:** [sales-lead-ai-assistant.onrender.com/docs](https://sales-lead-ai-assistant.onrender.com/docs) — try the `/chat` endpoint directly (note: free-tier hosting spins down after inactivity, so the first request may take 30-60 seconds to wake up)
+**Live demo:** [sales-lead-ai-assistant.onrender.com](https://sales-lead-ai-assistant.onrender.com) — chat with it directly in your browser (note: free-tier hosting spins down after inactivity, so the first request may take 30-60 seconds to wake up)
 
 ## Why I built this
 
@@ -38,7 +38,7 @@ Run it with:
 ```bash
 uvicorn api:app --reload
 ```
-Then visit `http://127.0.0.1:8000/docs` for an interactive testing UI.
+Then visit `http://127.0.0.1:8000/docs` for an interactive testing UI, or `http://127.0.0.1:8000/` for a simple browser-based chat interface.
 
 ## Example interaction
 
