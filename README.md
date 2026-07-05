@@ -2,6 +2,8 @@
 
 An AI assistant that helps sales reps get answers instantly — whether they're asking about a specific lead's status or a question about product pricing and features. Built to explore how LLM agents can combine **structured data lookup** (CRM records) with **unstructured knowledge retrieval** (RAG over product docs) in a single conversational interface.
 
+**Live demo:** [sales-lead-ai-assistant.onrender.com/docs](https://sales-lead-ai-assistant.onrender.com/docs) — try the `/chat` endpoint directly (note: free-tier hosting spins down after inactivity, so the first request may take 30-60 seconds to wake up)
+
 ## Why I built this
 
 Coming from a marketing/sales background, I've seen firsthand how much time reps lose context-switching between a CRM and internal docs just to answer simple questions. This project is a small proof-of-concept of an assistant that removes that friction — and a hands-on way for me to learn the core building blocks of modern AI engineering: LLM APIs, tool use, and retrieval-augmented generation.
