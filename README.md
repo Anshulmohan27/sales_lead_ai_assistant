@@ -19,7 +19,24 @@ The LLM (Gemini 2.5 Flash) reads the user's question, calls the appropriate tool
 
 - **Google Gemini API** (`google-genai`) — LLM calls, function calling, embeddings
 - **ChromaDB** — local vector database for semantic search over product docs
+- **FastAPI** — REST API layer exposing the assistant as a `POST /chat` endpoint
 - **python-dotenv** — safe API key management
+
+## API
+
+The assistant is exposed as a FastAPI web service (`api.py`), separate from the core logic (`main.py`) — following a clean separation between business logic and the web layer.
+
+**Endpoint:** `POST /chat`
+**Request body:** `{"message": "What's the status on the Jensen deal?"}`
+**Response:** `{"reply": "The Jensen deal with NVIDIA is currently in the negotiation stage..."}`
+
+Includes graceful handling of API rate limits (returns a clean `429` instead of a raw crash) and Pydantic request validation.
+
+Run it with:
+```bash
+uvicorn api:app --reload
+```
+Then visit `http://127.0.0.1:8000/docs` for an interactive testing UI.
 
 ## Example interaction
 
