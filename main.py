@@ -81,6 +81,19 @@ def search_product_docs(question: str) -> str:
     results = product_kb.query(query_texts=[question], n_results=2)
     return "\n".join(results["documents"][0])
 
+conversation_history = []
+
+def chat_with_memory(user_message: str) -> str:
+    conversation_history.append({"role": "user", "parts": [{"text": user_message}]})
+    
+    response = client.models.generate_content(
+        model="gemini-2.5-flash",
+        contents=conversation_history,
+        config={'tools': [get_lead_info, get_lead_info_by_company, search_product_docs]}
+    )
+    
+    conversation_history.append({"role": "model", "parts": [{"text": response.text}]})
+    return response.text
 
 if __name__ == "__main__":
     print("Sales Assistant ready. Type 'quit' to exit.\n")
@@ -89,11 +102,8 @@ if __name__ == "__main__":
         if user_input.lower() == "quit":
             break
         try:
-            response = client.models.generate_content(
-                model="gemini-2.5-flash",
-                contents=user_input,
-                config={'tools': [get_lead_info, get_lead_info_by_company, search_product_docs]}
-            )
-            print(f"Assistant: {response.text}\n")
+            answer = chat_with_memory(user_input)
+
+            print(f"Assistant: {answer}\n")
         except errors.ClientError:
             print("Assistant: I'm getting rate-limited right now — please wait a moment and try again.\n")

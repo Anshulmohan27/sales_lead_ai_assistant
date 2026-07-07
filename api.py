@@ -18,14 +18,18 @@ app = FastAPI(
 class ChatRequest(BaseModel):
     message: str
 
+conversation_history = []
+
 @app.post("/chat", summary="Ask the sales assistant a question")
 def chat(request: ChatRequest):
+    conversation_history.append({"role": "user", "parts": [{"text": request.message}]})
     try:
         response = client.models.generate_content(
             model="gemini-2.5-flash",
-            contents=request.message,
+            contents=conversation_history,
             config={'tools': [get_lead_info, get_lead_info_by_company, search_product_docs]}
         )
+        conversation_history.append({"role": "model", "parts": [{"text": response.text}]})
         return {"reply": response.text}
     except errors.ClientError:
         raise HTTPException(status_code=429, detail="Rate limited — please try again shortly.")
