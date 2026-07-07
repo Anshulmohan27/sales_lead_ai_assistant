@@ -19,23 +19,29 @@
 
     <script>
         async function sendMessage() {
-            const input = document.getElementById("messageInput");
-            const message = input.value;
-            if (!message) return;
+    const input = document.getElementById("messageInput");
+    const message = input.value;
+    if (!message) return;
 
-            const chat = document.getElementById("chat");
-            chat.innerHTML += `<div class="user">You: ${message}</div>`;
-            input.value = "";
+    const chat = document.getElementById("chat");
+    chat.innerHTML += `<div class="user">You: ${message}</div>`;
+    input.value = "";
 
-            const response = await fetch("/chat", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ message: message })
-            });
-            const data = await response.json();
-            chat.innerHTML += `<div class="bot">Assistant: ${data.reply}</div>`;
-            chat.scrollTop = chat.scrollHeight;
-        }
+    const response = await fetch("/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: message })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+        chat.innerHTML += `<div class="bot">Assistant: ${data.detail || "Something went wrong."}</div>`;
+    } else {
+        chat.innerHTML += `<div class="bot">Assistant: ${data.reply}</div>`;
+    }
+    chat.scrollTop = chat.scrollHeight;
+}
     </script>
 </body>
 </html>
