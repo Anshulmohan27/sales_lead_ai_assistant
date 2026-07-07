@@ -10,12 +10,17 @@ Coming from a marketing/sales background, I've seen firsthand how much time reps
 
 ## How it works
 
-The assistant is given two tools and decides on its own which one (if any) a question needs:
+The assistant is given three tools and decides on its own which one (if any) a question needs:
 
-1. **`get_lead_info`** — looks up a lead's company, deal value, stage, and notes from a CRM object, given a client's name
-2. **`search_product_docs`** — performs semantic search over a small vector database of product documentation (pricing, features, policies) and returns the most relevant context
+1. **`get_lead_info`** — looks up a lead's company, deal value, stage, and notes from a CRM object, given a client's first name
+2. **`get_lead_info_by_company`** — same lookup, but by company name instead of client name
+3. **`search_product_docs`** — performs semantic search over a small vector database of product documentation (pricing, features, policies) and returns the most relevant context
 
-The LLM (Gemini 2.5 Flash) reads the user's question, calls the appropriate tool automatically via function calling, and generates a natural-language answer grounded in the real data returned — rather than guessing.
+The LLM (Gemini 2.5 Flash) reads the user's question, calls the appropriate tool(s) automatically via function calling, and generates a natural-language answer grounded in the real data returned — rather than guessing. It can also chain multiple tool calls within a single turn (e.g. "compare the Jensen deal to the Elon deal" triggers two separate lookups before answering).
+
+**Conversation memory:** the assistant uses Gemini's chat session (`client.chats.create()`) rather than one-off calls, so it retains context across turns — you can ask a follow-up like "what about Elon's?" without repeating yourself.
+
+*Known limitation:* the current implementation uses a single shared chat session for all users of the deployed API — a production version would need a separate session per user (e.g. tracked by session ID or login), rather than one global conversation.
 
 ## Tech stack
 
@@ -84,9 +89,9 @@ python main.py
 ## What I'd build next
 
 - Move the CRM from in-memory Python objects to a real database (SQLite/PostgreSQL)
-- Wrap this in a FastAPI backend so it's a real web service, not just a CLI
-- Add conversation memory so follow-up questions retain context
-- Deploy it with a simple web front-end
+- Per-user conversation sessions instead of one shared chat session (see known limitation above)
+- Add a frontend "typing" indicator and better error states in the chat UI
+- Persistent vector storage for the product knowledge base (currently rebuilt in-memory on each server restart)
 
 ## About me
 
