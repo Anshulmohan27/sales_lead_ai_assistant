@@ -81,18 +81,13 @@ def search_product_docs(question: str) -> str:
     results = product_kb.query(query_texts=[question], n_results=2)
     return "\n".join(results["documents"][0])
 
-conversation_history = []
+chat = client.chats.create(
+    model="gemini-2.5-flash",
+    config={'tools': [get_lead_info, get_lead_info_by_company, search_product_docs]}
+)
 
 def chat_with_memory(user_message: str) -> str:
-    conversation_history.append({"role": "user", "parts": [{"text": user_message}]})
-    
-    response = client.models.generate_content(
-        model="gemini-2.5-flash",
-        contents=conversation_history,
-        config={'tools': [get_lead_info, get_lead_info_by_company, search_product_docs]}
-    )
-    
-    conversation_history.append({"role": "model", "parts": [{"text": response.text}]})
+    response = chat.send_message(user_message)
     return response.text
 
 if __name__ == "__main__":
